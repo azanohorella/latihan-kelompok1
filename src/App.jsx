@@ -1,119 +1,106 @@
+
 import { useEffect, useState } from "react";
-import "./index.css";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/users"
-      );
-
-      if (!response.ok) {
-        throw new Error("Gagal mengambil data.");
-      }
-
-      const data = await response.json();
-      setUsers(data);
-    } catch (err) {
-      setError(err.message || "Terjadi kesalahan.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data pengguna");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setUsers(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
   return (
-    <main className="container">
+    <div className="container">
       <header>
-        <p className="subtitle">PRAKTIK REACT JS</p>
-        <h1>Daftar Pengguna</h1>
+        <p className="subtitle">USER MANAGEMENT</p>
+        <h1>Data Pengguna</h1>
         <p>
-          Data pengguna yang diambil secara langsung
-          dari REST API.
+          Daftar informasi pengguna yang mencakup nama, email,
+          nomor telepon, website, dan alamat.
         </p>
       </header>
 
-      <section className="content">
+      <main className="content">
         <div className="section-header">
-          <h2>Data Pengguna</h2>
-
-          <button
-            onClick={fetchUsers}
-            disabled={loading}
-          >
-            {loading ? "Memuat..." : "Muat Ulang"}
-          </button>
+          <h2>Daftar Pengguna</h2>
+          <span className="summary">
+            Total: {users.length} pengguna
+          </span>
         </div>
 
         {loading && (
-          <p className="message">
-            Sedang mengambil data...
-          </p>
+          <div className="message">
+            Memuat data pengguna...
+          </div>
         )}
 
-        {!loading && error && (
+        {error && (
           <div className="error">
-            <p>{error}</p>
-            <button onClick={fetchUsers}>
-              Coba Lagi
-            </button>
+            Terjadi kesalahan: {error}
           </div>
         )}
 
         {!loading && !error && (
-          <>
-            <p className="summary">
-              Total pengguna: {users.length}
-            </p>
+          <div className="user-grid">
+            {users.map((user) => (
+              <div className="user-card" key={user.id}>
+                <div className="avatar">
+                  {user.name.charAt(0)}
+                </div>
 
-            <div className="user-grid">
-              {users.map((user) => (
-                <article
-                  className="user-card"
-                  key={user.id}
-                >
-                  <div className="avatar">
-                    {user.name.charAt(0)}
-                  </div>
+                <h3>{user.name}</h3>
+                <p>@{user.username}</p>
 
-                  <h3>{user.name}</h3>
-                  <p>@{user.username}</p>
+                <div className="details">
+                  <p>
+                    <strong>Email</strong>
+                    <span>{user.email}</span>
+                  </p>
 
-                  <div className="details">
-                    <p>
-                      <strong>Email</strong>
-                      <span>{user.email}</span>
-                    </p>
+                  <p>
+                    <strong>Nomor Telepon</strong>
+                    <span>{user.phone}</span>
+                  </p>
 
-                    <p>
-                      <strong>Perusahaan</strong>
-                      <span>{user.company.name}</span>
-                    </p>
+                  <p>
+                    <strong>Website</strong>
+                    <span>{user.website}</span>
+                  </p>
 
-                    <p>
-                      <strong>Kota</strong>
-                      <span>{user.address.city}</span>
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </>
+                  <p>
+                    <strong>Alamat</strong>
+                    <span>
+                      {user.address.street},{" "}
+                      {user.address.suite},{" "}
+                      {user.address.city}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-      </section>
+      </main>
 
-      <footer>Jobsheet CSR — Kelompok 1</footer>
-    </main>
+      <footer>
+        © 2026 User Management Dashboard
+      </footer>
+    </div>
   );
 }
 
